@@ -15,3 +15,6 @@ pip install scikit-learn
 
 ### Update
 2024.6.6 分位数赋法以及平均值调整
+
+### Todo
+使用高斯混合模型优化数据
