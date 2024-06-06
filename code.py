@@ -32,7 +32,7 @@ def generate_data(a, loc, scale, size, lower, upper):
     return data[:size]
 
 
-a_random = round(ran.uniform(0.01, 0.3), 2)  # a值随机
+a_random = round(ran.uniform(0, 0.3), 2)  # a值随机
 morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
 afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
 
