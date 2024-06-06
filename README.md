@@ -1,2 +1,1 @@
-# Modelling
-demo
+### 这是建模比赛D题的代码Demo
