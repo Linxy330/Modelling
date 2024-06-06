@@ -20,4 +20,3 @@ pip install scikit-learn
 
 ### Todo
 
-随机生成a值数据似乎离散(?)，考虑换回正态分布
