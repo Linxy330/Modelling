@@ -1,25 +1,38 @@
 import numpy as np  # 计算
 import matplotlib.pyplot as plt  # 绘图
-from scipy.stats import skewnorm, scoreatpercentile  # 统计&计算分位数
+from scipy.stats import scoreatpercentile  # 统计&计算分位数
 from sklearn.mixture import GaussianMixture  # 高斯混合模型
 import random as ran  # 生成随机数
 
-
 # 生成数据
-def generate_data(a, loc, scale, size, lower, upper):
-    data = skewnorm.rvs(a=a, loc=loc, scale=scale, size=size)
+def generate_data(mean, std, size, lower, upper):
+    data = np.random.normal(loc=mean, scale=std, size=size)
     data = data[(data >= lower) & (data <= upper)]  # 确保数据在范围内
     # 如果数据点不足，继续生成直到达到所需数量
     while len(data) < size:
-        additional_data = skewnorm.rvs(a=a, loc=loc, scale=scale, size=(size - len(data)))
+        additional_data = np.random.normal(loc=mean, scale=std, size=(size - len(data)))
         additional_data = additional_data[(additional_data >= lower) & (additional_data <= upper)]
         data = np.concatenate((data, additional_data))
     return data[:size]
 
 
-a_random = round(ran.uniform(0.01, 0.3), 2)  # a值随机
-morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
-afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
+# # 生成数据
+# def generate_data(a, loc, scale, size, lower, upper):
+#     data = skewnorm.rvs(a=a, loc=loc, scale=scale, size=size)
+#     data = data[(data >= lower) & (data <= upper)]  # 确保数据在范围内
+#     # 如果数据点不足，继续生成直到达到所需数量
+#     while len(data) < size:
+#         additional_data = skewnorm.rvs(a=a, loc=loc, scale=scale, size=(size - len(data)))
+#         additional_data = additional_data[(additional_data >= lower) & (additional_data <= upper)]
+#         data = np.concatenate((data, additional_data))
+#     return data[:size]
+#
+
+# a_random = round(ran.uniform(0.01, 0.3), 2)  # a值随机
+# morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
+# afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
+morning_data = generate_data(mean=42, std=10, size=9000, lower=0, upper=58)
+afternoon_data = generate_data(mean=28, std=10, size=700, lower=0, upper=53)
 
 # 分位数调整
 morning_sorted = np.sort(morning_data)
@@ -77,10 +90,10 @@ afternoon_adjusted[0] = 0
 combined_data = np.concatenate((morning_sorted, afternoon_adjusted))
 
 # 绘制
-# plt.hist(morning_sorted, bins=100, density=True, alpha=0.6, color='g', label='Morning')
-# plt.hist(afternoon_adjusted, bins=100, density=True, alpha=0.6, color='b', label='Afternoon (Adjusted)')
+plt.hist(morning_sorted, bins=100, density=True, alpha=0.6, color='g', label='Morning')
+plt.hist(afternoon_adjusted, bins=100, density=True, alpha=0.6, color='b', label='Afternoon (Adjusted)')
 plt.hist(combined_data, bins=100, density=True, alpha=0.6, color='r', label='Combined')
-plt.title('Combined Exam Score Distribution a=' + str(a_random))
+plt.title('Combined Exam Score Distribution')
 plt.xlabel('Score')
 plt.ylabel('Frequency')
 plt.legend()
