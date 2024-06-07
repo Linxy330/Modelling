@@ -41,7 +41,7 @@ def generate_smooth_data(data, size, bandwidth=0.5):
     return sampled_data.flatten()
 
 
-a_random = round(ran.uniform(0.01, 0.3), 2)  # a值随机
+a_random = round(ran.uniform(0, 0.3), 2)  # a值随机
 morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
 afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
 
