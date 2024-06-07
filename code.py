@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt  # 绘图
 from scipy.stats import skewnorm, scoreatpercentile  # 统计&计算分位数
 from sklearn.mixture import GaussianMixture  # 高斯混合模型
 import random as ran  # 生成随机数
-from sklearn.neighbors import KernelDensity
 
 
 # 生成数据
@@ -24,19 +23,37 @@ a_random_2 = round(ran.uniform(-0.1, 0.1), 3)
 morning_data = generate_data(a=a_random_1, loc=42, scale=10, size=9000, lower=0, upper=58)
 afternoon_data = generate_data(a=a_random_2, loc=28, scale=10, size=700, lower=0, upper=53)
 
+
 # 调整上下午平均数
+def adjust_data(data, a, loc, scale, size, lower, upper):
+    data = data[(data >= lower) & (data <= upper)]  # 确保数据在范围内
+    # 如果数据点不足，继续生成直到达到所需数量
+    while len(data) < size:
+        additional_data = skewnorm.rvs(a=a, loc=loc, scale=scale, size=(size - len(data)))
+        additional_data = additional_data[(additional_data >= lower) & (additional_data <= upper)]
+        data = np.concatenate((data, additional_data))
+    return data[:size]
+
+
+# 计算平均值
 morning_mean = np.mean(morning_data)
 afternoon_mean = np.mean(afternoon_data)
 morning_mean_diff = 42 - morning_mean
 afternoon_mean_diff = 28 - afternoon_mean
 
-if abs(morning_mean_diff) > 0:
-    addition_random = round(ran.uniform(-0.2, 0.2), 2)
-    morning_data += morning_mean_diff + addition_random
+while (abs(morning_mean_diff) > 0.2 or abs(afternoon_mean_diff) > 0.2):
+    if abs(morning_mean_diff) > 0.2:
+        morning_data += morning_mean_diff
+        morning_data = adjust_data(data=morning_data, a=a_random_1, loc=42, scale=10, size=9000, lower=0, upper=58)
 
-if abs(afternoon_mean_diff) > 0:
-    addition_random = round(ran.uniform(-0.2, 0.2), 2)
-    afternoon_data += afternoon_mean_diff + addition_random
+    if abs(afternoon_mean_diff) > 0.2:
+        afternoon_data += afternoon_mean_diff
+        afternoon_data = adjust_data(data=afternoon_data, a=a_random_2, loc=28, scale=10, size=700, lower=0, upper=53)
+
+    morning_mean = np.mean(morning_data)
+    afternoon_mean = np.mean(afternoon_data)
+    morning_mean_diff = 42 - morning_mean
+    afternoon_mean_diff = 28 - afternoon_mean
 
 # 分位数调整
 morning_sorted = np.sort(morning_data)
@@ -59,7 +76,9 @@ if abs(mean_diff) > 2:
     afternoon_sorted += adjustment + addition_random
 
 # 确保调整后的数据在正确范围内
-afternoon_sorted = np.clip(afternoon_sorted, 0, 60)
+afternoon_mean = np.mean(afternoon_sorted)
+afternoon_sorted = adjust_data(data=afternoon_sorted, a=a_random_2, loc=afternoon_mean, scale=10, size=700, lower=0,
+                               upper=60)
 
 
 # 创建高斯混合模型并进行数据拟合
@@ -99,14 +118,21 @@ morning_mean = round(np.mean(morning_sorted), 2)
 afternoon_origin_mean = round(np.mean(afternoon_data), 2)
 afternoon_mean = round(np.mean(afternoon_sorted), 2)
 combined_mean = round(np.mean(combined_data), 2)
+# 统计人数
+morning_len = len(morning_sorted)
+afternoon_origin_len = len(afternoon_data)
+afternoon_len = len(afternoon_sorted)
+combined_len = len(combined_data)
 
 # 绘制
-plt.hist(morning_sorted, bins=100, density=True, alpha=0.6, color='g', label='Morning mean=' + str(morning_mean))
+plt.hist(morning_sorted, bins=100, density=True, alpha=0.6, color='g',
+         label='Morning mean=' + str(morning_mean) + ' len=' + str(morning_len))
 plt.hist(afternoon_data, bins=100, density=True, alpha=0.6, color='y',
-         label='Afternoon mean=' + str(afternoon_origin_mean))
+         label='Afternoon mean=' + str(afternoon_origin_mean) + ' len=' + str(afternoon_origin_len))
 plt.hist(afternoon_adjusted, bins=100, density=True, alpha=0.6, color='b',
-         label='Afternoon (Adjusted) mean=' + str(afternoon_mean))
-plt.hist(combined_data, bins=100, density=True, alpha=0.6, color='r', label='Combined mean=' + str(combined_mean))
+         label='Afternoon (Adjusted) mean=' + str(afternoon_mean) + ' len=' + str(afternoon_len))
+plt.hist(combined_data, bins=100, density=True, alpha=0.6, color='r',
+         label='Combined mean=' + str(combined_mean) + ' len=' + str(combined_len))
 plt.title('Combined Exam Score Distribution a1=' + str(a_random_1) + ' a2=' + str(a_random_2))
 plt.xlabel('Score')
 plt.ylabel('Frequency')
