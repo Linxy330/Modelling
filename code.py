@@ -32,12 +32,14 @@ def generate_data(a, loc, scale, size, lower, upper):
         data = np.concatenate((data, additional_data))
     return data[:size]
 
+
 # 生成平滑数据
 def generate_smooth_data(data, size, bandwidth=0.5):
     kde = KernelDensity(bandwidth=bandwidth)
     kde.fit(data.reshape(-1, 1))
     sampled_data = kde.sample(size)
     return sampled_data.flatten()
+
 
 a_random = round(ran.uniform(0.01, 0.3), 2)  # a值随机
 morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
