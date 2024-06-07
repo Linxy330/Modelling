@@ -34,20 +34,20 @@ def generate_data(a, loc, scale, size, lower, upper):
 
 
 # 生成平滑数据
-def generate_smooth_data(data, size, bandwidth=0.5):
-    kde = KernelDensity(bandwidth=bandwidth)
-    kde.fit(data.reshape(-1, 1))
-    sampled_data = kde.sample(size)
-    return sampled_data.flatten()
+# def generate_smooth_data(data, size, bandwidth=0.5):
+#     kde = KernelDensity(bandwidth=bandwidth)
+#     kde.fit(data.reshape(-1, 1))
+#     sampled_data = kde.sample(size)
+#     return sampled_data.flatten()
 
-
+# 生成数据
 a_random = round(ran.uniform(0, 0.3), 2)  # a值随机
 morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
 afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
 
 # 平滑处理上午数据
-morning_data = generate_smooth_data(morning_data, size=9000)
-afternoon_data = generate_smooth_data(afternoon_data, size=700)
+# morning_data = generate_smooth_data(morning_data, size=9000)
+# afternoon_data = generate_smooth_data(afternoon_data, size=700)
 
 # 分位数调整
 morning_sorted = np.sort(morning_data)
@@ -104,11 +104,19 @@ afternoon_adjusted[0] = 0
 # 合并上午数据和调整后的下午数据
 combined_data = np.concatenate((morning_sorted, afternoon_adjusted))
 
+# 统计平均值
+morning_mean = round(np.mean(morning_sorted), 2)
+afternoon_origin_mean = round(np.mean(afternoon_data), 2)
+afternoon_mean = round(np.mean(afternoon_sorted), 2)
+combined_mean = round(np.mean(combined_data), 2)
+
 # 绘制
-plt.hist(morning_sorted, bins=100, density=True, alpha=0.6, color='g', label='Morning')
-plt.hist(afternoon_data, bins=100, density=True, alpha=0.6, color='y', label='Afternoon')
-plt.hist(afternoon_adjusted, bins=100, density=True, alpha=0.6, color='b', label='Afternoon (Adjusted)')
-plt.hist(combined_data, bins=100, density=True, alpha=0.6, color='r', label='Combined')
+plt.hist(morning_sorted, bins=100, density=True, alpha=0.6, color='g', label='Morning mean=' + str(morning_mean))
+plt.hist(afternoon_data, bins=100, density=True, alpha=0.6, color='y',
+         label='Afternoon mean=' + str(afternoon_origin_mean))
+plt.hist(afternoon_adjusted, bins=100, density=True, alpha=0.6, color='b',
+         label='Afternoon (Adjusted) mean=' + str(afternoon_mean))
+plt.hist(combined_data, bins=100, density=True, alpha=0.6, color='r', label='Combined mean=' + str(combined_mean))
 plt.title('Combined Exam Score Distribution a=' + str(a_random))
 plt.xlabel('Score')
 plt.ylabel('Frequency')
