@@ -7,21 +7,6 @@ from sklearn.neighbors import KernelDensity
 
 
 # 生成数据
-# def generate_data(mean, std, size, lower, upper):
-#     data = np.random.normal(loc=mean, scale=std, size=size)
-#     data = data[(data >= lower) & (data <= upper)]  # 确保数据在范围内
-#     # 如果数据点不足，继续生成直到达到所需数量
-#     while len(data) < size:
-#         additional_data = np.random.normal(loc=mean, scale=std, size=(size - len(data)))
-#         additional_data = additional_data[(additional_data >= lower) & (additional_data <= upper)]
-#         data = np.concatenate((data, additional_data))
-#     return data[:size]
-
-
-# morning_data = generate_data(mean=42, std=10, size=9000, lower=0, upper=58)
-# afternoon_data = generate_data(mean=28, std=10, size=700, lower=0, upper=53)
-
-# 生成数据
 def generate_data(a, loc, scale, size, lower, upper):
     data = skewnorm.rvs(a=a, loc=loc, scale=scale, size=size)
     data = data[(data >= lower) & (data <= upper)]  # 确保数据在范围内
@@ -33,21 +18,25 @@ def generate_data(a, loc, scale, size, lower, upper):
     return data[:size]
 
 
-# 生成平滑数据
-# def generate_smooth_data(data, size, bandwidth=0.5):
-#     kde = KernelDensity(bandwidth=bandwidth)
-#     kde.fit(data.reshape(-1, 1))
-#     sampled_data = kde.sample(size)
-#     return sampled_data.flatten()
-
 # 生成数据
-a_random = round(ran.uniform(0, 0.3), 2)  # a值随机
-morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, upper=58)
-afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
+a_random_1 = round(ran.uniform(-0.1, 0.1), 3)  # a值随机
+a_random_2 = round(ran.uniform(-0.1, 0.1), 3)
+morning_data = generate_data(a=a_random_1, loc=42, scale=10, size=9000, lower=0, upper=58)
+afternoon_data = generate_data(a=a_random_2, loc=28, scale=10, size=700, lower=0, upper=53)
 
-# 平滑处理上午数据
-# morning_data = generate_smooth_data(morning_data, size=9000)
-# afternoon_data = generate_smooth_data(afternoon_data, size=700)
+# 调整上下午平均数
+morning_mean = np.mean(morning_data)
+afternoon_mean = np.mean(afternoon_data)
+morning_mean_diff = 42 - morning_mean
+afternoon_mean_diff = 28 - afternoon_mean
+
+if abs(morning_mean_diff) > 0:
+    addition_random = round(ran.uniform(-0.2, 0.2), 2)
+    morning_data += morning_mean_diff + addition_random
+
+if abs(afternoon_mean_diff) > 0:
+    addition_random = round(ran.uniform(-0.2, 0.2), 2)
+    afternoon_data += afternoon_mean_diff + addition_random
 
 # 分位数调整
 morning_sorted = np.sort(morning_data)
@@ -66,7 +55,8 @@ mean_diff = morning_mean - afternoon_mean
 
 if abs(mean_diff) > 2:
     adjustment = mean_diff - 2 if mean_diff > 0 else mean_diff + 2
-    afternoon_sorted += adjustment
+    addition_random = round(ran.uniform(0, 4), 2)
+    afternoon_sorted += adjustment + addition_random
 
 # 确保调整后的数据在正确范围内
 afternoon_sorted = np.clip(afternoon_sorted, 0, 60)
@@ -117,7 +107,7 @@ plt.hist(afternoon_data, bins=100, density=True, alpha=0.6, color='y',
 plt.hist(afternoon_adjusted, bins=100, density=True, alpha=0.6, color='b',
          label='Afternoon (Adjusted) mean=' + str(afternoon_mean))
 plt.hist(combined_data, bins=100, density=True, alpha=0.6, color='r', label='Combined mean=' + str(combined_mean))
-plt.title('Combined Exam Score Distribution a=' + str(a_random))
+plt.title('Combined Exam Score Distribution a1=' + str(a_random_1) + ' a2=' + str(a_random_2))
 plt.xlabel('Score')
 plt.ylabel('Frequency')
 plt.legend()
