@@ -4,6 +4,8 @@ from scipy.stats import skewnorm, scoreatpercentile  # 统计&计算分位数
 from sklearn.mixture import GaussianMixture  # 高斯混合模型
 import random as ran  # 生成随机数
 from sklearn.neighbors import KernelDensity
+
+
 # 生成数据
 # def generate_data(mean, std, size, lower, upper):
 #     data = np.random.normal(loc=mean, scale=std, size=size)
@@ -42,7 +44,7 @@ morning_data = generate_data(a=-a_random, loc=42, scale=10, size=9000, lower=0, 
 afternoon_data = generate_data(a=a_random, loc=28, scale=10, size=700, lower=0, upper=53)
 
 # 平滑处理上午数据
-#morning_data = generate_smooth_data(morning_data, size=9000)
+morning_data = generate_smooth_data(morning_data, size=9000)
 afternoon_data = generate_smooth_data(afternoon_data, size=700)
 
 # 分位数调整
