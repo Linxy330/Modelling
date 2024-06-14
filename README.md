@@ -25,3 +25,5 @@ pip install scikit-learn
 ### Todo
 
 2024.6.11 代码似乎过度拟合
+
+2024.6.14 直接使用分位数赋法
